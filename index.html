@@ -1,0 +1,980 @@
+<!DOCTYPE html><html lang="es-MX">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>Gym Voice Coach Beta</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --border: #334155;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #22c55e;
+      --accent-2: #16a34a;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+      --radius: 18px;
+    }* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100%;
+}
+
+body {
+  padding: 16px;
+}
+
+.app {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+.card {
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.status-box {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.large-value {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+button {
+  appearance: none;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.primary {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #052e16;
+}
+
+.secondary {
+  background: #1e293b;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.danger {
+  background: #7f1d1d;
+  color: #fee2e2;
+}
+
+.warning {
+  background: #78350f;
+  color: #fef3c7;
+}
+
+.muted-panel {
+  background: #0f172a;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.log {
+  max-height: 220px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.log-item {
+  background: #0b1220;
+  border: 1px solid #253246;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.log-item small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+  background: #0b1220;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #1f2937;
+  font-size: 0.9rem;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  background: #111827;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #0b1220;
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--muted);
+  width: fit-content;
+}
+
+.green-dot,
+.red-dot,
+.yellow-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.green-dot { background: var(--accent); }
+.red-dot { background: var(--danger); }
+.yellow-dot { background: var(--warning); }
+
+.footer-note {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@media (max-width: 560px) {
+  .status-grid,
+  .button-row {
+    grid-template-columns: 1fr;
+  }
+
+  .large-value {
+    font-size: 1.7rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card header">
+      <h1 class="title">Gym Voice Coach Beta</h1>
+      <p class="subtitle">
+        Beta web para Android, orientada a uso manos libres en el gimnasio. Escucha comandos de voz,
+        registra series localmente y calcula sugerencias simples de progresión sin backend.
+      </p>
+      <div class="pill">
+        <span id="micDot" class="red-dot"></span>
+        <span id="micStatus">Micrófono inactivo</span>
+      </div>
+    </section><section class="card">
+  <div class="status-grid">
+    <div class="status-box">
+      <span class="label">Sesión</span>
+      <div id="sessionStatus" class="value">No iniciada</div>
+    </div>
+    <div class="status-box">
+      <span class="label">Rutina activa</span>
+      <div id="routineName" class="value">—</div>
+    </div>
+    <div class="status-box">
+      <span class="label">Ejercicio actual</span>
+      <div id="currentExercise" class="value">—</div>
+    </div>
+    <div class="status-box">
+      <span class="label">Descanso</span>
+      <div id="restTimer" class="large-value">00:00</div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <div class="button-row">
+    <button id="startListeningBtn" class="primary">Iniciar escucha</button>
+    <button id="stopListeningBtn" class="secondary">Detener escucha</button>
+    <button id="startWorkoutBtn" class="secondary">Iniciar entrenamiento demo</button>
+    <button id="endWorkoutBtn" class="danger">Terminar entrenamiento</button>
+  </div>
+</section>
+
+<section class="card">
+  <span class="label">Último comando interpretado</span>
+  <div id="lastCommand" class="value">—</div>
+  <div style="height:12px"></div>
+  <span class="label">Respuesta del coach</span>
+  <div id="coachResponse" class="muted-panel">Listo para escuchar comandos.</div>
+</section>
+
+<section class="card">
+  <span class="label">Comandos ejemplo</span>
+  <div class="log">
+    <div class="log-item mono">iniciar entrenamiento pull</div>
+    <div class="log-item mono">registrar curl de bíceps 25 libras 10 repeticiones</div>
+    <div class="log-item mono">registrar remo sentado 90 libras 8 repeticiones</div>
+    <div class="log-item mono">terminé serie</div>
+    <div class="log-item mono">terminar entrenamiento pull</div>
+  </div>
+</section>
+
+<section class="card">
+  <span class="label">Eventos recientes</span>
+  <div id="eventLog" class="log"></div>
+</section>
+
+<section class="card">
+  <span class="label">Historial local</span>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Rutina</th>
+          <th>Ejercicio</th>
+          <th>Peso</th>
+          <th>Reps</th>
+          <th>Serie</th>
+          <th>Duración serie</th>
+          <th>Sugerencia</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card footer-note">
+  Limitación importante: en navegador móvil, la escucha continua no está garantizada si la pantalla se apaga,
+  si el navegador pasa a segundo plano o si Android suspende la pestaña. Para esta beta, úsala con la pantalla encendida.
+</section>
+
+  </main>  <script>
+    (() => {
+      'use strict';
+
+      const STORAGE_KEY = 'gymVoiceCoachBetaState';
+      const DEFAULT_REST_SECONDS = 60;
+      const PROGRESSION_RANGE = { min: 8, max: 10 };
+
+      const ui = {
+        micDot: document.getElementById('micDot'),
+        micStatus: document.getElementById('micStatus'),
+        sessionStatus: document.getElementById('sessionStatus'),
+        routineName: document.getElementById('routineName'),
+        currentExercise: document.getElementById('currentExercise'),
+        restTimer: document.getElementById('restTimer'),
+        lastCommand: document.getElementById('lastCommand'),
+        coachResponse: document.getElementById('coachResponse'),
+        eventLog: document.getElementById('eventLog'),
+        historyTableBody: document.getElementById('historyTableBody'),
+        startListeningBtn: document.getElementById('startListeningBtn'),
+        stopListeningBtn: document.getElementById('stopListeningBtn'),
+        startWorkoutBtn: document.getElementById('startWorkoutBtn'),
+        endWorkoutBtn: document.getElementById('endWorkoutBtn')
+      };
+
+      const state = loadState();
+      let recognition = null;
+      let isListening = false;
+      let shouldAutoRestartRecognition = false;
+      let restIntervalId = null;
+      let speechSynthesisEnabled = 'speechSynthesis' in window;
+
+      function createDefaultState() {
+        return {
+          activeWorkout: null,
+          history: [],
+          logs: [],
+          rest: {
+            active: false,
+            endsAt: null,
+            durationSeconds: DEFAULT_REST_SECONDS
+          },
+          seriesTracker: {},
+          lastCommand: '',
+          lastCoachResponse: 'Listo para escuchar comandos.'
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return createDefaultState();
+          const parsed = JSON.parse(raw);
+          return {
+            ...createDefaultState(),
+            ...parsed,
+            rest: {
+              ...createDefaultState().rest,
+              ...(parsed.rest || {})
+            },
+            seriesTracker: parsed.seriesTracker || {},
+            history: Array.isArray(parsed.history) ? parsed.history : [],
+            logs: Array.isArray(parsed.logs) ? parsed.logs : []
+          };
+        } catch (error) {
+          console.error('No se pudo cargar el estado local:', error);
+          return createDefaultState();
+        }
+      }
+
+      function persistState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function logEvent(message) {
+        const entry = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+          message,
+          createdAt: new Date().toISOString()
+        };
+        state.logs.unshift(entry);
+        state.logs = state.logs.slice(0, 50);
+        persistState();
+        renderLogs();
+      }
+
+      function setCoachResponse(message, speak = true) {
+        state.lastCoachResponse = message;
+        persistState();
+        ui.coachResponse.textContent = message;
+        if (speak) speakText(message);
+      }
+
+      function speakText(text) {
+        if (!speechSynthesisEnabled) return;
+        try {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'es-MX';
+          utterance.rate = 1;
+          utterance.pitch = 1;
+          window.speechSynthesis.speak(utterance);
+        } catch (error) {
+          console.warn('No se pudo reproducir la voz:', error);
+        }
+      }
+
+      function formatDateTime(iso) {
+        return new Date(iso).toLocaleString('es-MX', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      function formatDurationSeconds(seconds) {
+        const total = Math.max(0, Math.floor(seconds));
+        const mins = String(Math.floor(total / 60)).padStart(2, '0');
+        const secs = String(total % 60).padStart(2, '0');
+        return `${mins}:${secs}`;
+      }
+
+      function normalizeText(text) {
+        return text
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, ' ');
+      }
+
+      function capitalizeWords(value) {
+        return value
+          .split(' ')
+          .filter(Boolean)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
+
+      function updateSeriesTracker(exerciseName) {
+        const key = normalizeText(exerciseName);
+        state.seriesTracker[key] = (state.seriesTracker[key] || 0) + 1;
+        persistState();
+        return state.seriesTracker[key];
+      }
+
+      function resetSeriesCounterForWorkout() {
+        state.seriesTracker = {};
+        persistState();
+      }
+
+      function startWorkout(routineName) {
+        if (state.activeWorkout) {
+          setCoachResponse('Ya hay un entrenamiento activo. Termínalo antes de iniciar otro.');
+          return;
+        }
+
+        state.activeWorkout = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+          routineName: capitalizeWords(routineName),
+          startedAt: new Date().toISOString(),
+          currentExercise: null,
+          exerciseStartedAt: null
+        };
+
+        resetSeriesCounterForWorkout();
+        stopRestTimer(false);
+        persistState();
+        render();
+        logEvent(`Entrenamiento iniciado: ${state.activeWorkout.routineName}`);
+        setCoachResponse(`Entrenamiento ${state.activeWorkout.routineName} iniciado.`);
+      }
+
+      function endWorkout() {
+        if (!state.activeWorkout) {
+          setCoachResponse('No hay entrenamiento activo para terminar.');
+          return;
+        }
+
+        const routineName = state.activeWorkout.routineName;
+        state.activeWorkout = null;
+        stopRestTimer(false);
+        persistState();
+        render();
+        logEvent(`Entrenamiento terminado: ${routineName}`);
+        setCoachResponse(`Entrenamiento ${routineName} terminado. Buen trabajo.`);
+      }
+
+      function startRestTimer(durationSeconds = DEFAULT_REST_SECONDS) {
+        stopRestTimer(false);
+        state.rest = {
+          active: true,
+          endsAt: Date.now() + durationSeconds * 1000,
+          durationSeconds
+        };
+        persistState();
+        renderRestTimer();
+
+        restIntervalId = window.setInterval(() => {
+          const remaining = Math.max(0, Math.ceil((state.rest.endsAt - Date.now()) / 1000));
+          renderRestTimer();
+
+          if (remaining <= 0) {
+            stopRestTimer(false);
+            logEvent('Descanso terminado');
+            setCoachResponse('Descanso terminado. Puedes iniciar la siguiente serie.');
+          }
+        }, 250);
+      }
+
+      function stopRestTimer(announce = false) {
+        if (restIntervalId) {
+          window.clearInterval(restIntervalId);
+          restIntervalId = null;
+        }
+
+        state.rest = {
+          active: false,
+          endsAt: null,
+          durationSeconds: DEFAULT_REST_SECONDS
+        };
+        persistState();
+        renderRestTimer();
+
+        if (announce) {
+          setCoachResponse('Cronómetro de descanso detenido.');
+        }
+      }
+
+      function renderRestTimer() {
+        if (!state.rest.active || !state.rest.endsAt) {
+          ui.restTimer.textContent = '00:00';
+          return;
+        }
+
+        const remaining = Math.max(0, Math.ceil((state.rest.endsAt - Date.now()) / 1000));
+        ui.restTimer.textContent = formatDurationSeconds(remaining);
+      }
+
+      function getHistoryForExercise(exerciseName) {
+        const key = normalizeText(exerciseName);
+        return state.history.filter(item => normalizeText(item.exerciseName) === key);
+      }
+
+      function getProgressionSuggestion(exerciseName, weight, reps) {
+        const previous = getHistoryForExercise(exerciseName)
+          .filter(item => Number(item.weight) === Number(weight))
+          .slice(0, 3);
+
+        if (reps >= PROGRESSION_RANGE.max) {
+          return 'Estás en el tope del rango. Considera subir peso.';
+        }
+
+        if (reps >= PROGRESSION_RANGE.min && previous.length >= 2) {
+          return 'Mantén el peso. Vas consistente dentro del rango.';
+        }
+
+        if (reps < PROGRESSION_RANGE.min) {
+          return 'Mantén o baja un poco el peso hasta consolidar técnica y rango.';
+        }
+
+        return 'Sigue acumulando datos para una mejor sugerencia.';
+      }
+
+      function registerSet({ exerciseName, weight, reps }) {
+        if (!state.activeWorkout) {
+          setCoachResponse('Primero inicia un entrenamiento para poder registrar una serie.');
+          return;
+        }
+
+        const now = new Date();
+        const normalizedExercise = capitalizeWords(exerciseName);
+        const setNumber = updateSeriesTracker(normalizedExercise);
+
+        let durationSeconds = null;
+        if (
+          state.activeWorkout.currentExercise &&
+          normalizeText(state.activeWorkout.currentExercise) === normalizeText(normalizedExercise) &&
+          state.activeWorkout.exerciseStartedAt
+        ) {
+          durationSeconds = Math.max(
+            1,
+            Math.round((Date.now() - new Date(state.activeWorkout.exerciseStartedAt).getTime()) / 1000)
+          );
+        }
+
+        state.activeWorkout.currentExercise = normalizedExercise;
+        state.activeWorkout.exerciseStartedAt = now.toISOString();
+
+        const suggestion = getProgressionSuggestion(normalizedExercise, weight, reps);
+
+        const row = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(now.getTime() + Math.random()),
+          recordedAt: now.toISOString(),
+          routineName: state.activeWorkout.routineName,
+          exerciseName: normalizedExercise,
+          weight: Number(weight),
+          reps: Number(reps),
+          setNumber,
+          setDurationSeconds: durationSeconds,
+          suggestion
+        };
+
+        state.history.unshift(row);
+        state.history = state.history.slice(0, 500);
+        persistState();
+        render();
+
+        logEvent(
+          `Serie registrada: ${normalizedExercise}, ${weight} lb, ${reps} reps, serie ${setNumber}`
+        );
+
+        setCoachResponse(
+          `Registré ${normalizedExercise}, ${weight} libras, ${reps} repeticiones. ${suggestion}`
+        );
+
+        startRestTimer(DEFAULT_REST_SECONDS);
+      }
+
+      function parseCommand(rawCommand) {
+        const command = normalizeText(rawCommand);
+
+        const startWorkoutMatch = command.match(/^iniciar entrenamiento (.+)$/);
+        if (startWorkoutMatch) {
+          return { type: 'START_WORKOUT', payload: { routineName: startWorkoutMatch[1] } };
+        }
+
+        const endWorkoutMatch = command.match(/^terminar entrenamiento(?: (.+))?$/);
+        if (endWorkoutMatch) {
+          return { type: 'END_WORKOUT', payload: {} };
+        }
+
+        const registerSetMatch = command.match(
+          /^registrar (.+?) (\d+(?:\.\d+)?) libras (\d+) repeticiones$/
+        );
+        if (registerSetMatch) {
+          return {
+            type: 'REGISTER_SET',
+            payload: {
+              exerciseName: registerSetMatch[1],
+              weight: Number(registerSetMatch[2]),
+              reps: Number(registerSetMatch[3])
+            }
+          };
+        }
+
+        if (command === 'termine serie' || command === 'terminé serie') {
+          return { type: 'START_REST', payload: { seconds: DEFAULT_REST_SECONDS } };
+        }
+
+        if (command === 'detener descanso') {
+          return { type: 'STOP_REST', payload: {} };
+        }
+
+        if (command === 'estado actual') {
+          return { type: 'STATUS', payload: {} };
+        }
+
+        return { type: 'UNKNOWN', payload: { original: rawCommand } };
+      }
+
+      function handleCommand(rawCommand) {
+        state.lastCommand = rawCommand;
+        persistState();
+        ui.lastCommand.textContent = rawCommand;
+
+        const result = parseCommand(rawCommand);
+
+        switch (result.type) {
+          case 'START_WORKOUT':
+            startWorkout(result.payload.routineName);
+            break;
+          case 'END_WORKOUT':
+            endWorkout();
+            break;
+          case 'REGISTER_SET':
+            registerSet(result.payload);
+            break;
+          case 'START_REST':
+            startRestTimer(result.payload.seconds);
+            logEvent(`Descanso iniciado por ${result.payload.seconds} segundos`);
+            setCoachResponse('Descanso de un minuto iniciado.');
+            break;
+          case 'STOP_REST':
+            stopRestTimer(true);
+            break;
+          case 'STATUS':
+            announceStatus();
+            break;
+          default:
+            setCoachResponse(
+              'No entendí el comando. Prueba con: iniciar entrenamiento pull, registrar curl 25 libras 10 repeticiones, o terminar entrenamiento pull.'
+            );
+        }
+      }
+
+      function announceStatus() {
+        if (!state.activeWorkout) {
+          setCoachResponse('No hay entrenamiento activo.');
+          return;
+        }
+
+        const restText = state.rest.active && state.rest.endsAt
+          ? `Descanso restante ${formatDurationSeconds(Math.ceil((state.rest.endsAt - Date.now()) / 1000))}.`
+          : 'No hay descanso activo.';
+
+        setCoachResponse(
+          `Entrenamiento ${state.activeWorkout.routineName}. Ejercicio actual ${state.activeWorkout.currentExercise || 'ninguno'}. ${restText}`
+        );
+      }
+
+      function setupSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+          setCoachResponse('Este navegador no soporta reconocimiento de voz web. Prueba con Chrome en Android.', false);
+          return;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-MX';
+        recognition.continuous = true;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          isListening = true;
+          ui.micDot.className = 'green-dot';
+          ui.micStatus.textContent = 'Micrófono escuchando';
+          logEvent('Reconocimiento de voz iniciado');
+        };
+
+        recognition.onresult = (event) => {
+          const lastIndex = event.results.length - 1;
+          const transcript = event.results[lastIndex][0].transcript.trim();
+          handleCommand(transcript);
+        };
+
+        recognition.onerror = (event) => {
+          console.warn('Speech recognition error:', event.error);
+          logEvent(`Error de voz: ${event.error}`);
+
+          if (event.error === 'not-allowed') {
+            shouldAutoRestartRecognition = false;
+            setCoachResponse('No tengo permiso para usar el micrófono. Debes conceder acceso.');
+            return;
+          }
+
+          if (event.error === 'no-speech') {
+            return;
+          }
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          ui.micDot.className = 'red-dot';
+          ui.micStatus.textContent = 'Micrófono inactivo';
+          logEvent('Reconocimiento de voz detenido');
+
+          if (shouldAutoRestartRecognition) {
+            window.setTimeout(() => {
+              if (shouldAutoRestartRecognition) startListening();
+            }, 450);
+          }
+        };
+      }
+
+      function startListening() {
+        // 🔥 Forzar request de permiso de micrófono en móviles (Android/Chrome)
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+              stream.getTracks().forEach(track => track.stop());
+              console.log('Permiso de micrófono concedido');
+            })
+            .catch(err => {
+              console.warn('Permiso de micrófono denegado:', err);
+              setCoachResponse('Debes permitir el micrófono en los permisos del navegador. Toca el candado en la URL y habilítalo.');
+              return;
+            });
+        }
+        if (!recognition) {
+          setupSpeechRecognition();
+        }
+
+        if (!recognition || isListening) return;
+
+        shouldAutoRestartRecognition = true;
+
+        try {
+          recognition.start();
+        } catch (error) {
+          console.warn('No se pudo iniciar el reconocimiento:', error);
+        }
+      }
+
+      function stopListening() {
+        shouldAutoRestartRecognition = false;
+        if (recognition && isListening) {
+          recognition.stop();
+        }
+      }
+
+      function renderLogs() {
+        ui.eventLog.innerHTML = '';
+
+        if (!state.logs.length) {
+          const empty = document.createElement('div');
+          empty.className = 'log-item';
+          empty.textContent = 'Todavía no hay eventos.';
+          ui.eventLog.appendChild(empty);
+          return;
+        }
+
+        state.logs.forEach(item => {
+          const node = document.createElement('div');
+          node.className = 'log-item';
+          node.innerHTML = `
+            <div>${escapeHtml(item.message)}</div>
+            <small>${escapeHtml(formatDateTime(item.createdAt))}</small>
+          `;
+          ui.eventLog.appendChild(node);
+        });
+      }
+
+      function renderHistory() {
+        ui.historyTableBody.innerHTML = '';
+
+        if (!state.history.length) {
+          const row = document.createElement('tr');
+          row.innerHTML = '<td colspan="8">Aún no hay series registradas.</td>';
+          ui.historyTableBody.appendChild(row);
+          return;
+        }
+
+        state.history.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${escapeHtml(formatDateTime(item.recordedAt))}</td>
+            <td>${escapeHtml(item.routineName)}</td>
+            <td>${escapeHtml(item.exerciseName)}</td>
+            <td>${escapeHtml(String(item.weight))} lb</td>
+            <td>${escapeHtml(String(item.reps))}</td>
+            <td>${escapeHtml(String(item.setNumber))}</td>
+            <td>${item.setDurationSeconds ? escapeHtml(formatDurationSeconds(item.setDurationSeconds)) : '—'}</td>
+            <td>${escapeHtml(item.suggestion)}</td>
+          `;
+          ui.historyTableBody.appendChild(row);
+        });
+      }
+
+      function renderSession() {
+        if (!state.activeWorkout) {
+          ui.sessionStatus.textContent = 'No iniciada';
+          ui.routineName.textContent = '—';
+          ui.currentExercise.textContent = '—';
+          return;
+        }
+
+        ui.sessionStatus.textContent = `Activa desde ${formatDateTime(state.activeWorkout.startedAt)}`;
+        ui.routineName.textContent = state.activeWorkout.routineName;
+        ui.currentExercise.textContent = state.activeWorkout.currentExercise || '—';
+      }
+
+      function render() {
+        renderSession();
+        renderRestTimer();
+        renderLogs();
+        renderHistory();
+        ui.lastCommand.textContent = state.lastCommand || '—';
+        ui.coachResponse.textContent = state.lastCoachResponse || 'Listo para escuchar comandos.';
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function attachEvents() {
+        ui.startListeningBtn.addEventListener('click', startListening);
+        ui.stopListeningBtn.addEventListener('click', stopListening);
+
+        ui.startWorkoutBtn.addEventListener('click', () => {
+          startWorkout('Pull');
+        });
+
+        ui.endWorkoutBtn.addEventListener('click', endWorkout);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            logEvent('La pestaña pasó a segundo plano. La escucha puede interrumpirse.');
+          }
+        });
+      }
+
+      function resumeRestTimerIfNeeded() {
+        if (!state.rest.active || !state.rest.endsAt) return;
+
+        if (Date.now() >= state.rest.endsAt) {
+          stopRestTimer(false);
+          return;
+        }
+
+        renderRestTimer();
+        restIntervalId = window.setInterval(() => {
+          const remaining = Math.max(0, Math.ceil((state.rest.endsAt - Date.now()) / 1000));
+          renderRestTimer();
+          if (remaining <= 0) {
+            stopRestTimer(false);
+            setCoachResponse('Descanso terminado.');
+          }
+        }, 250);
+      }
+
+      function init() {
+        render();
+        attachEvents();
+        setupSpeechRecognition();
+        resumeRestTimerIfNeeded();
+      }
+
+      init();
+    })();
+  </script></body>
+</html>
